@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Hosting.Server;
 using Microsoft.AspNet.Http.Features;
@@ -33,30 +34,28 @@ namespace Microsoft.AspNet.SignalR.Tests
             return host.Build().ApplicationServices;
         }
 
+        private class Server : IServer
+        {
+            private RequestDelegate _requestDelegate;
+
+            public IFeatureCollection Features { get; }
+            
+            public void Start(RequestDelegate requestDelegate)
+            {
+                _requestDelegate = requestDelegate;
+            }
+
+            public void Dispose()
+            {
+
+            }
+        }
+
         private class ServerFactory : IServerFactory
         {
-            public IFeatureCollection Initialize(IConfiguration configuration)
+            public IServer CreateServer(IConfiguration configuration)
             {
-                return null;
-            }
-
-            public IDisposable Start(IFeatureCollection serverFeatures, Func<IFeatureCollection, Task> application)
-            {
-                return new StartInstance(application);
-            }
-
-            private class StartInstance : IDisposable
-            {
-                private readonly Func<IFeatureCollection, Task> _application;
-
-                public StartInstance(Func<IFeatureCollection, Task> application)
-                {
-                    _application = application;
-                }
-
-                public void Dispose()
-                {
-                }
+                return new Server();
             }
         }
     }
